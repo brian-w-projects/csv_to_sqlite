@@ -1,6 +1,7 @@
 import csv
 import sys
 import sqlite3
+import argparse
 
 db = sqlite3.connect('data.db')
 c = db.cursor()
@@ -13,7 +14,16 @@ def read_csv(filename, define):
 
     list_reader = list(reader)
 
-    if define == 'f':
+    if define:
+        print('Identify each column as:\nText: t\nInteger: i\nBlob: b\nReal: r\n')
+        info = [(x, convert_input_data(input(x + ' is of type: '))) for x in list_reader[0]]
+
+        modify = []
+        for row in list_reader[1:]:
+            modify.append([convert_types(ele, typping[1]) for ele, typping in zip(row, info)])
+
+        return info, modify
+    else:
         column_names = [name for name in list_reader[0]]
         column_data_types = [find_types(column_data) for column_data in list_reader[1]]
 
@@ -24,16 +34,8 @@ def read_csv(filename, define):
             modify.append([convert_types(ele, typping) for ele, typping in zip(row, column_data_types)])
 
         return info, modify
-    else:
-        print('Identify each column as:\nText: t\nInteger: i\nBlob: b\nReal: r\n')
-        info = [(x, convert_input_data(input(x + ' is of type: '))) for x in list_reader[0]]
 
 
-        modify = []
-        for row in list_reader[1:]:
-            modify.append([convert_types(ele, typping[1]) for ele, typping in zip(row, info)])
-
-        return info, modify
 
 
 def find_types(x):
@@ -88,6 +90,7 @@ def create_table(header, table_name):
     for var_name, var_type in header:
         creation += var_name + ' ' + var_type + ', '
     creation = creation[0:-2] + ')'
+    print(creation)
     c.execute(creation)
 
 
@@ -100,14 +103,17 @@ def add_data(header, data, tablename):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 3:
-        print('python csv_to_sql.py [filename] [table_name] [self-define]')
-        print('[filename] = .csv file')
-        print('[table_name] = name of table')
-        print('[self-define] = t/f If f program will attempt to identify Column data types')
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description='Convert CSV file to SQLITE table')
+    parser.add_argument('-d', action='store_true', dest='define', default=False,
+                help='Set flag to identify Column types otherwise program will attempt to determine automatically.')
+    parser.add_argument('filename', action='store', help='Set .csv file to read from.')
+    parser.add_argument('-t', action='store', default='data', dest='table_name',
+                help='Set table name. Default is data.')
 
-    _, filename, table_name, define = sys.argv
+    results = parser.parse_args()
+    filename = results.filename
+    define = results.define
+    table_name = results.table_name or 'table'
 
     header, data = read_csv(filename, define)
     create_table(header, table_name)
