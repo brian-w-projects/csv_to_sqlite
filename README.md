@@ -1,6 +1,7 @@
 <h1>CSV TO SQL</h1>
 <h2>Brian W Projects</h2>
 
+<pre>
 This small program will parse through a .csv file and easily convert it to a SQLite file for further easy querying.
 
 Usage:
@@ -18,5 +19,4 @@ optional arguments:
   -t TABLE_NAME  Set table name. Default is data.
   -d DATABASE    Set existing database to add table to. Default creates new
                  database named data.db
-
-
+</pre>
