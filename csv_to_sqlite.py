@@ -106,15 +106,16 @@ if __name__ == '__main__':
 
     if define:
         print('Identify each column as:\nText: t\nInteger: i\nBlob: b\nReal: r\n')
-        header_info = [(head_ele, convert_input_data(input(head_ele + ' is of type: '))) for head_ele in row0]
+        header_info = [(head_ele.replace(' ', '_'), convert_input_data(input(head_ele + ' is of type: '))) for head_ele in row0]
         create_table(header_info, table_name)
     else:
         print('Identifying variable types')
         row1 = next(reader)
-        header_info = [(head_ele, find_types(head_ele, column_data)) for head_ele, column_data in zip(row0, row1)]
+        header_info = [(head_ele.replace(' ', '_'), find_types(head_ele, column_data)) for head_ele, column_data in zip(row0, row1)]
         create_table(header_info, table_name)
         add_data([convert_types(element, typing[1]) for element, typing in zip(row1, header_info)], table_name)
 
+    print('Running...')
     for row in reader:
         add_data([convert_types(element, typing[1]) for element, typing in zip(row, header_info)], table_name)
     print('Data successfully added')
